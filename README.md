@@ -1,2 +1,2 @@
 # Sudoku
-Sudoku solver, built from scratch.
+Sudoku solver, will be changing this to make it more user friendly.
