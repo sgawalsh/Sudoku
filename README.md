@@ -1,2 +1,2 @@
 # Sudoku
-Sudoku solver, will be changing this to make it more user friendly.
+Sudoku solver, contains 4 puzzles plus the ability to take new puzzles.
