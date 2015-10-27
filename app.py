@@ -46,6 +46,9 @@ D > Delete puzzle
                 choice = raw_input('> ')
                 if choice.isdigit():
                     choice = int(choice)
+                    if not 0 < choice <= len(boardList):
+                        print "Out of range, choose another number pls."
+                        continue
                     break
                 else:
                     print 'choose a number pls.'
@@ -71,6 +74,9 @@ D > Delete puzzle
                 choice = raw_input('> ')
                 if choice.isdigit():
                     choice = int(choice)
+                    if not 0 < choice <= len(boardList):
+                        print "Out of range, try another number."
+                        continue
                     del boardList[choice - 1]
                     pickle.dump(boardList, open("puzzle.p", "wb"))
                     break
