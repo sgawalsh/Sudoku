@@ -1,285 +1,102 @@
 import pickle
+import Sudoklasses
 
-class square(object):
+def startMenu():
+    print "Welcome to Stephen's Sudoku App"
+    while True:
+        choice = raw_input("""What would you like to do?
 
-    def __init__(self, x, y):
-        self.pot = [1,2,3,4,5,6,7,8,9]
-        self.x = x
-        self.y = y
-        self.solved = False
+C > Create new puzzle
+L > Load puzzle
+D > Delete puzzle
 
-    def assignVal(self, val):
-        self.pot = [val]
-        self.solved = True
-
-    def remPot(self, rems):
-        for el in rems:
-            if el in self.pot:
-                self.pot.remove(el)
-
-        if self.checkSolved():
-            return True
-        else:
-            return False
-
-    def checkSolved(self):
-        if len(self.pot) == 1:
-            self.solved = True
-            print"A %d has been found at %d, %d." %(self.pot[0], self.x, self.y)
-            #raw_input("A %d has been found at %d, %d." %(self.pot[0], self.x, self.y))
-            return True
-        else:
-            return False
-
-class board(object):
-
-    def __init__(self):
-        print "Let's make a board"
-
-        self.board = []
-
-        for el in xrange(9):
-            row = []
-            for el2 in xrange(9):
-                row.append(square(el2, el))
-            self.board.append(row)
-
-        self.assignVals()
-        self.printBoard()
-
-    def setPotentials(self, n, pots):
-        count = 0
-        while count < n:
-            x = int(raw_input('x = ?'))
-            y = int(raw_input('y = ?'))
-            self.board[y][x].pot = pots
-            count += 1
-
-    def solveRow(self):
-        for y in xrange(9):
-            nums = []
-            for x1 in xrange(9):
-                if self.board[y][x1].solved:
-                    nums.append(self.board[y][x1].pot[0])
+> """)
+        if choice == 'c' or choice == 'C':
             while True:
-                for x2 in xrange(9):
-                    if not self.board[y][x2].solved:
-                        if self.board[y][x2].remPot(nums):
-                            print 'row find!'
-                            nums.append(self.board[y][x2].pot[0])
-                            x2 = 0
-                            self.printBoard()
-                            self.oneCol(x2, y, self.board[y][x2].pot[0])
-                            self.oneSquare(x2, y, self.board[y][x2].pot[0])
+                board1 = Sudoklasses.board()
+                print "The board looks like this:"
+                board1.printBoard()
+                choice1 = raw_input("Is this the board you wish to create? y/n \n> ")
+                if choice1 == 'y' or choice1 == 'Y':
+                    while True:
+                        choice2 = raw_input("Would you like to save this puzzle? y/n\n> ")
+                        if choice2 == 'y' or choice2 == 'Y':
+                            boardList = pickle.load(open("puzzle.p", "rb"))
+                            boardList.append(board1)
+                            pickle.dump(boardList, open("puzzle.p", "wb"))
                             break
-                else:
+                        elif choice2 == 'n' or choice2 == 'N':
+                            break
+                        else:
+                            print "hmm.. let's try that again"
                     break
-
-    def potRow(self):
-        for y in xrange(9):
-            for x1 in xrange(9):
-                matches = []
-                set = list(self.board[y][x1].pot)
-                for x2 in xrange(9):
-                    inSet = True
-                    for el2 in self.board[y][x2].pot:
-                        if el2 not in set:
-                            inSet = False
-                            break
-                    if inSet:
-                        matches.append(x2)
-                if len(matches) is len(set):
-                    toRemove = range(9)
-                    for el in matches:
-                        toRemove.remove(el)
-                    for el in toRemove:
-                        if not self.board[y][el].solved and self.board[y][el].remPot(set):
-                            print 'potrow find'
-                            self.printBoard()
-
-    def solveCol(self):
-        for x1 in xrange(9):
-            nums = list()
-            for y1 in xrange(9):
-                if self.board[y1][x1].solved:
-                    nums.append(self.board[y1][x1].pot[0])
+                elif choice1 == 'n' or choice1 == 'N':
+                    continue
+                else:
+                    'que?'
+        elif choice == 'l' or choice == 'L':
+            boardList = pickle.load(open("puzzle.p", "rb"))
+            if len(boardList) is 0:
+                print "No saves found."
+                continue
+            print "Which puzzle do you want to load?"
+            for el in xrange(len(boardList)):
+                print el + 1, '. ', boardList[el].name
             while True:
-                for y2 in xrange(9):
-                    if not self.board[y2][x1].solved:
-                        if self.board[y2][x1].remPot(nums):
-                            print 'col find!'
-                            nums.append(self.board[y2][x1].pot[0])
-                            self.printBoard()
-                            self.oneRow(x1, y2, self.board[y2][x1].pot[0])
-                            self.oneSquare(x1, y2, self.board[y2][x1].pot[0])
-                            break
-                else:
+                choice = raw_input('> ')
+                if choice.isdigit():
+                    choice = int(choice)
                     break
-
-    def potCol(self):
-        for x in xrange(9):
-            for y1 in xrange(9):
-                matches = []
-                set = list(self.board[y1][x].pot)
-                for y2 in xrange(9):
-                    inSet = True
-                    for el2 in self.board[y2][x].pot:
-                        if el2 not in set:
-                            inSet = False
-                            break
-                    if inSet:
-                        matches.append(y2)
-                if len(matches) is len(set):
-                    toRemove = range(9)
-                    for el in matches:
-                        toRemove.remove(el)
-                    for el in toRemove:
-                        if not self.board[el][x].solved and self.board[el][x].remPot(set):
-                            print 'pot col find'
-                            self.printBoard()
-
-    def solveSquare(self, x1, y1):
-        nums = []
-        for x in xrange(x1, x1+3):
-            for y in xrange(y1, y1+3):
-                if self.board[y][x].solved:
-                    nums.append(self.board[y][x].pot[0])
-        while True:
-            for x in xrange(x1, x1+3):
-                for y in xrange(y1, y1+3):
-                    if not self.board[y][x].solved:
-                        if self.board[y][x].remPot(nums):
-                            print 'square find!'
-                            nums.append(self.board[y][x].pot[0])
-                            self.printBoard()
-                            self.oneRow(x, y, self.board[y][x].pot[0])
-                            self.oneCol(x, y, self.board[y][x].pot[0])
-                            break
-            else:
+                else:
+                    print 'choose a number pls.'
+            board1 = boardList[choice - 1]
+            print "Here is the board"
+            board1.printBoard()
+            choice = raw_input("Is this the board you want to load? y/n \n> ")
+            if choice == 'y' or choice == 'Y':
                 break
-
-    def oneCol(self, x, y, val):
-        y1 = range(9)
-        y1.remove(y)
-        for y2 in y1:
-            if val in self.board[y2][x].pot:
-                self.board[y2][x].pot.remove(val)
-
-    def oneRow(self, x, y, val):
-        x1 = range(9)
-        x1.remove(x)
-        for x2 in x1:
-            if val in self.board[y][x2].pot:
-                self.board[y][x2].pot.remove(val)
-
-    def oneSquare(self, x, y, val):
-        for y1 in xrange(3, 10, 3):
-            if y < y1:
-                for x1 in xrange(3, 10, 3):
-                    if x < x1:
-                        x1 -=3
-                        y1 -=3
-                        for x2 in xrange(3):
-                            for y2 in xrange(3):
-                                if x2 + x1 is not x and y2 + y1 is not y:
-                                    if val in self.board[y1 + y2][x1 + x2].pot:
-                                        self.board[y1 + y2][x1 + x2].pot.remove(val)
-                        return
-
-    def potSquare(self, xin, yin):
-        for x1 in xrange(xin, xin+3):
-            for y1 in xrange(yin, yin+3):
-                matches = []
-                set = list(self.board[y1][x1].pot)
-                for x2 in xrange(xin, xin+3):
-                    for y2 in xrange(yin, yin+3):
-                        inSet = True
-                        for el2 in self.board[y2][x2].pot:
-                            if el2 not in set:
-                                inSet = False
-                                break
-                        if inSet:
-                            matches.append((y2,x2))
-                    if len(matches) is len(set):
-                        toRemove = [(yin, xin), (yin, xin+1), (yin, xin+2), (yin+1, xin), (yin+1, xin+1), (yin+1, xin+2), (yin+2, xin), (yin+2, xin+1), (yin+2, xin+2)]
-                        for el in matches:
-                            toRemove.remove(el)
-                        for el in toRemove:
-                            if not self.board[el[0]][el[1]].solved and self.board[el[0]][el[1]].remPot(set):
-                                print 'pot square find'
-                                self.printBoard()
-
-    def checkBoardSolved(self):
-        for x in xrange(9):
-            for y in xrange(9):
-                if not self.board[y][x].solved:
-                    print "Board is not solved"
-                    return False
+            elif choice == 'n' or choice == 'N':
+                continue
+            else:
+                print 'wat'
+        elif choice == 'd' or choice == 'D':
+            boardList = pickle.load(open("puzzle.p", "rb"))
+            if len(boardList) is 0:
+                print "No saves found."
+                continue
+            print "Which puzzle do you want to delete?"
+            for el in xrange(len(boardList)):
+                print el + 1, '. ', boardList[el].name
+            while True:
+                choice = raw_input('> ')
+                if choice.isdigit():
+                    choice = int(choice)
+                    del boardList[choice - 1]
+                    pickle.dump(boardList, open("puzzle.p", "wb"))
+                    break
+                else:
+                    print 'choose a number pls.'
         else:
-            return True
+            'no comprendo senor.'
+    return board1
 
-    def assignVals(self):
-        print "Lets assign values"
-        for y in xrange(9):
-            for x in xrange(9):
-                while(True):
-                    inNum = raw_input("What is the value of square (%d, %d)? press u for unknown \n> " %(x,y))
-                    if not inNum.isdigit():
-                        if inNum == 'u' or inNum == 'U':
-                            break
-                        else:
-                            print "wat?"
-                    elif 0 < int(inNum) < 10:
-                        self.board[y][x].assignVal(int(inNum))
-                        break
-                    else:
-                        print "That's the wrong number."
+board1 = startMenu()
 
-    def assignVal(self):
-        n = 0
-        while n < 2:
-            x = int(raw_input("x = ? \n >"))
-            y = int(raw_input("y = ? \n >"))
-            val = int(raw_input("value = ? \n >"))
-            self.board[y][x].assignVal(val)
-            n += 1
-
-    def printBoard(self):
-        for y1 in xrange(3):
-            for y2 in xrange(3):
-                for x1 in xrange(3):
-                    for x2 in xrange(3):
-                        if self.board[y1 * 3 + y2][x2 + x1 * 3].solved:
-                            print self.board[y1 * 3 + y2][x2 + x1 * 3].pot[0],
-                        else:
-                            print 'x',
-                        print " ",
-                    if x1 < 2:
-                        print '| ',
-                print "\n"
-            if y1 < 2:
-                for count in xrange(20):
-                    print '-',
-                print '\n'
-
-#board1 = board()
-#pickle.dump([board1], open("puzzle.p", "wb"))
-
-board1 = pickle.load(open("puzzle.p", "rb"))[0] #temp
-board1.printBoard()
 while not board1.checkBoardSolved():
-    board1.printBoard
+    board1.printBoard()
     board1.solveRow()
     board1.solveCol()
-    for y in xrange(0,8,3):
-        for x in xrange(0,8,3):
+    for y in xrange(0, 8, 3):
+        for x in xrange(0, 8, 3):
             board1.solveSquare(x, y)
     board1.potRow()
     board1.potCol()
-    for y in xrange(0,8,3):
-        for x in xrange(0,8,3):
+    for y in xrange(0, 8, 3):
+        for x in xrange(0, 8, 3):
             board1.potSquare(x, y)
 
 print 'wow you solved the board'
-board1.printBoard()
-raw_input('you win')
+if board1.validateBoard():
+    raw_input('you win')
+else:
+    raw_input('you lose')
